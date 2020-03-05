@@ -20,9 +20,42 @@ const evaluate = (f, l, o) => {
   l = Number(l);
   if (o === "+") return f + l;
   else if (o === "-") return f - l;
+  else if (o === "/" && l === 0) throw "TypeError: Division by zero.";
   else if (o === "/") return f / l;
   else return f * l;
 };
+
+class Token {
+  constructor() {
+    this.inst = null;
+    this.tokens = [];
+  }
+  static getInst() {
+    if (!this.inst) this.inst = new Token();
+    return this.inst;
+  }
+  tokenize(str) {
+    str = str.trim();
+    var s = "";
+    for (var index = 0; index < str.length; index++) {
+      s += str[index];
+      const peek = str[index + 1];
+      if (!isNaN(s.trim()) && isNaN(peek)) {
+        this.tokens.push(s.trim());
+        s = "";
+      }
+      if (s.trim() == "(" || s.trim() == ")") {
+        s.trim() == "(" ? this.tokens.push("(") : this.tokens.push(")");
+        s = "";
+      }
+      if (isOperator(s.trim()) && !isOperator(peek)) {
+        this.tokens.push(s.trim());
+        s = "";
+      }
+    }
+    return this.tokens;
+  }
+}
 
 // https://en.wikipedia.org/wiki/Reverse_Polish_notation
 const postfixEvalutation = postfixExpression => {
@@ -55,8 +88,8 @@ function expressionCalculator(expr) {
   let operatorStack = [];
   let outputQueue = [];
 
-  expr = expr.trim();
-  expr.split(" ").forEach(token => {
+  expr = new Token().tokenize(expr);
+  expr.forEach(token => {
     if (token === "") return;
     // console.log(token);
     // if the token is a number, then:
@@ -89,6 +122,8 @@ function expressionCalculator(expr) {
 
     // if the token is a right paren (i.e. ")"), then:
     if (token === ")") {
+      if (operatorStack.indexOf("(") === -1)
+        throw "ExpressionError: Brackets must be paired";
       // while the operator at the top of the operator stack is not a left paren:
       while (top(operatorStack) !== "(") {
         // pop the operator from the operator stack onto the output queue.
@@ -104,6 +139,10 @@ function expressionCalculator(expr) {
   /* After while loop, if operator stack not null, pop everything to output queue */
   // if there are no more tokens to read then:
   // while there are still operator tokens on the stack:
+  //   console.log(operatorStack);
+  //   console.log(operatorStack.indexOf(")"));
+  if (operatorStack.indexOf(")") !== -1 || operatorStack.indexOf("(") !== -1)
+    throw "ExpressionError: Brackets must be paired";
   while (top(operatorStack)) {
     outputQueue.push(operatorStack.pop());
   }
@@ -111,20 +150,11 @@ function expressionCalculator(expr) {
   // pop the operator from the operator stack onto the output queue.
   // exit.
   //   console.log(outputQueue);
-  //   console.log(operatorStack);
   //   if (operatorStack.length > 0)
   // throw "ExpressionError: Brackets must be paired";
   // console.log(postfixEvalutation(outputQueue));
   return postfixEvalutation(outputQueue);
 }
-
-// expressionCalculator(
-//   " ( ( 15 / ( 7 - ( 1 + 1 ) ) ) * 3 ) - ( 2 + ( 1 + 1 ) ) "
-// );
-
-// -821.5556
-// expressionCalculator("20 - 57 * 12 - (  58 + 84 * 32 / 27  )");
-// 3 4 2 × 1 5 - 2 3 ^ ^ ÷ +
 
 module.exports = {
   expressionCalculator
