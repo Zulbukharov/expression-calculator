@@ -1,6 +1,3 @@
-// https://en.wikipedia.org/wiki/Shunting-yard_algorithm
-// https://en.wikipedia.org/wiki/Reverse_Polish_notation
-
 function eval() {
   // Do not use eval!!!
   return;
@@ -27,8 +24,7 @@ const evaluate = (f, l, o) => {
   else return f * l;
 };
 
-// from infix to postfix
-
+// https://en.wikipedia.org/wiki/Reverse_Polish_notation
 const postfixEvalutation = postfixExpression => {
   let stack = [];
   // for each token in the postfix expression:
@@ -53,13 +49,15 @@ const postfixEvalutation = postfixExpression => {
   //   result ← pop from the stack
 };
 
+// from infix to postfix
+// https://en.wikipedia.org/wiki/Shunting-yard_algorithm
 function expressionCalculator(expr) {
   let operatorStack = [];
   let outputQueue = [];
 
   expr = expr.trim();
   expr.split(" ").forEach(token => {
-    // if (token === " ") return;
+    if (token === "") return;
     // console.log(token);
     // if the token is a number, then:
     if (!isNaN(token))
@@ -113,15 +111,19 @@ function expressionCalculator(expr) {
   // pop the operator from the operator stack onto the output queue.
   // exit.
   //   console.log(outputQueue);
-  console.log(operatorStack);
-  if (operatorStack.length > 0)
-    throw "ExpressionError: Brackets must be paired";
+  //   console.log(operatorStack);
+  //   if (operatorStack.length > 0)
+  // throw "ExpressionError: Brackets must be paired";
+  // console.log(postfixEvalutation(outputQueue));
   return postfixEvalutation(outputQueue);
 }
 
 // expressionCalculator(
 //   " ( ( 15 / ( 7 - ( 1 + 1 ) ) ) * 3 ) - ( 2 + ( 1 + 1 ) ) "
 // );
+
+// -821.5556
+// expressionCalculator("20 - 57 * 12 - (  58 + 84 * 32 / 27  )");
 // 3 4 2 × 1 5 - 2 3 ^ ^ ÷ +
 
 module.exports = {
